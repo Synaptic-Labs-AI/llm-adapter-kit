@@ -1,0 +1,14 @@
+{
+  "name": "llm-adapter-kit-examples",
+  "private": true,
+  "scripts": {
+    "basic": "tsx basic-usage.ts",
+    "streaming": "tsx streaming-example.ts",
+    "cost": "tsx cost-tracking.ts",
+    "advanced": "tsx advanced-features.ts",
+    "all": "npm run basic && npm run streaming && npm run cost && npm run advanced"
+  },
+  "devDependencies": {
+    "tsx": "^4.15.7"
+  }
+}
