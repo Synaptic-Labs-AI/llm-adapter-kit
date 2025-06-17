@@ -13,6 +13,7 @@ export { AnthropicAdapter } from './anthropic/AnthropicAdapter';
 export { MistralAdapter } from './mistral/MistralAdapter';
 export { OpenRouterAdapter } from './openrouter/OpenRouterAdapter';
 export { RequestyAdapter } from './requesty/RequestyAdapter';
+export { GroqAdapter } from './groq/GroqAdapter';
 // export { OllamaAdapter } from './OllamaAdapter';  // Not implemented yet
 
 // Model registry and cost calculation
@@ -27,6 +28,7 @@ import { AnthropicAdapter } from './anthropic/AnthropicAdapter';
 import { MistralAdapter } from './mistral/MistralAdapter';
 import { OpenRouterAdapter } from './openrouter/OpenRouterAdapter';
 import { RequestyAdapter } from './requesty/RequestyAdapter';
+import { GroqAdapter } from './groq/GroqAdapter';
 // import { OllamaAdapter } from './OllamaAdapter';  // Not implemented yet
 import { SupportedProvider, LLMProviderError } from './types';
 
@@ -49,6 +51,8 @@ export function createAdapter(provider: SupportedProvider, model?: string): Base
       return new OpenRouterAdapter(model);
     case 'requesty':
       return new RequestyAdapter(model);
+    case 'groq':
+      return new GroqAdapter(model);
     // case 'ollama':
     //   return new OllamaAdapter(model);
     default:
@@ -64,7 +68,7 @@ export function createAdapter(provider: SupportedProvider, model?: string): Base
  * Get all available providers
  */
 export function getAvailableProviders(): SupportedProvider[] {
-  return ['openai', 'google', 'anthropic', 'mistral', 'openrouter', 'requesty'];
+  return ['openai', 'google', 'anthropic', 'mistral', 'openrouter', 'requesty', 'groq'];
 }
 
 /**
@@ -129,6 +133,7 @@ export async function selectBestProvider(criteria?: {
 
     // Performance preferences (subjective weights based on 2025 performance)
     const performanceScores: Record<string, number> = {
+      'groq': 6,      // Ultra-fast inference
       'google': 5,    // Gemini 2.5 Flash - best performance/cost
       'anthropic': 4, // Claude 4 - best reasoning
       'openai': 3,    // GPT-4 Turbo - reliable
@@ -142,6 +147,7 @@ export async function selectBestProvider(criteria?: {
     if (criteria?.prefersCost) {
       // Adjust for cost (lower cost = higher score)
       const costScores: Record<string, number> = {
+        'groq': 3,      // Very competitive pricing
         'google': 3,    // Gemini Flash - best value
         'mistral': 2,   // Good pricing
         'requesty': 2,  // Cost optimization
@@ -155,6 +161,7 @@ export async function selectBestProvider(criteria?: {
     if (criteria?.prefersSpeed) {
       // Adjust for speed
       const speedScores: Record<string, number> = {
+        'groq': 5,      // Ultra-fast inference (up to 750 tokens/sec)
         'google': 3,    // Gemini Flash
         'openai': 2,    // GPT-4 Turbo
         'openrouter': 2,

@@ -127,13 +127,14 @@ export class LLMProviderError extends Error {
   }
 }
 
-export type SupportedProvider = 
-  | 'openai' 
-  | 'google' 
-  | 'anthropic' 
-  | 'mistral' 
-  | 'openrouter' 
+export type SupportedProvider =
+  | 'openai'
+  | 'google'
+  | 'anthropic'
+  | 'mistral'
+  | 'openrouter'
   | 'requesty'
+  | 'groq'
   | 'ollama';
 
 export type SupportedModel = 
