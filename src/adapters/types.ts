@@ -135,6 +135,7 @@ export type SupportedProvider =
   | 'openrouter'
   | 'requesty'
   | 'groq'
+  | 'perplexity'
   | 'ollama';
 
 export type SupportedModel = 
@@ -154,6 +155,13 @@ export type SupportedModel =
   | 'mistral-medium-3'
   | 'mistral-small-3.1-25.03'
   | 'codestral-25.01'
+  // Perplexity
+  | 'sonar'
+  | 'sonar-pro'
+  | 'sonar-reasoning'
+  | 'sonar-reasoning-pro'
+  | 'sonar-deep-research'
+  | 'r1-1776'
   // OpenRouter (prefix)
   | string // Any OpenRouter model
   // Requesty (prefix)

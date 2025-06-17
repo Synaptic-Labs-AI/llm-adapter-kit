@@ -14,6 +14,7 @@ export { MistralAdapter } from './mistral/MistralAdapter';
 export { OpenRouterAdapter } from './openrouter/OpenRouterAdapter';
 export { RequestyAdapter } from './requesty/RequestyAdapter';
 export { GroqAdapter } from './groq/GroqAdapter';
+export { PerplexityAdapter } from './perplexity/PerplexityAdapter';
 // export { OllamaAdapter } from './OllamaAdapter';  // Not implemented yet
 
 // Model registry and cost calculation
@@ -29,6 +30,7 @@ import { MistralAdapter } from './mistral/MistralAdapter';
 import { OpenRouterAdapter } from './openrouter/OpenRouterAdapter';
 import { RequestyAdapter } from './requesty/RequestyAdapter';
 import { GroqAdapter } from './groq/GroqAdapter';
+import { PerplexityAdapter } from './perplexity/PerplexityAdapter';
 // import { OllamaAdapter } from './OllamaAdapter';  // Not implemented yet
 import { SupportedProvider, LLMProviderError } from './types';
 
@@ -53,6 +55,8 @@ export function createAdapter(provider: SupportedProvider, model?: string): Base
       return new RequestyAdapter(model);
     case 'groq':
       return new GroqAdapter(model);
+    case 'perplexity':
+      return new PerplexityAdapter(model);
     // case 'ollama':
     //   return new OllamaAdapter(model);
     default:
@@ -68,7 +72,7 @@ export function createAdapter(provider: SupportedProvider, model?: string): Base
  * Get all available providers
  */
 export function getAvailableProviders(): SupportedProvider[] {
-  return ['openai', 'google', 'anthropic', 'mistral', 'openrouter', 'requesty', 'groq'];
+  return ['openai', 'google', 'anthropic', 'mistral', 'openrouter', 'requesty', 'groq', 'perplexity'];
 }
 
 /**

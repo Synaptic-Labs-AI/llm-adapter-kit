@@ -1,12 +1,12 @@
 # LLM Adapter Kit
 
-A universal TypeScript library for interacting with multiple LLM providers through a unified interface. Supports 600+ models across 6 major providers with built-in cost calculation, streaming, and advanced features.
+A universal TypeScript library for interacting with multiple LLM providers through a unified interface. Supports 600+ models across 8 major providers with built-in cost calculation, streaming, and advanced features.
 
 ## 🚀 Features
 
 - **Universal Interface**: Single API for all LLM providers
-- **6 Major Providers**: OpenAI, Anthropic, Google, Mistral, OpenRouter, Requesty
-- **600+ Models**: Access to the latest models including GPT-4o, Claude 4, Gemini 2.5
+- **8 Major Providers**: OpenAI, Anthropic, Google, Mistral, Groq, OpenRouter, Requesty, Perplexity
+- **600+ Models**: Access to the latest models including GPT-4o, Claude 4, Gemini 2.5, Sonar
 - **Cost Tracking**: Built-in token counting and cost calculation
 - **Streaming Support**: Real-time response streaming
 - **Advanced Features**: Function calling, JSON mode, vision support
@@ -37,17 +37,20 @@ MISTRAL_API_KEY=...
 # Optional: Multi-provider aggregators
 OPENROUTER_API_KEY=sk-or-...  # 400+ models
 REQUESTY_API_KEY=...          # 150+ models
+PERPLEXITY_API_KEY=pplx-...   # Web search & reasoning
 ```
 
 ## 🎯 Quick Start
 
 ```typescript
-import { OpenAIAdapter, AnthropicAdapter, GoogleAdapter } from 'llm-adapter-kit';
+import { OpenAIAdapter, AnthropicAdapter, GoogleAdapter, GroqAdapter, PerplexityAdapter } from 'llm-adapter-kit';
 
 // Initialize adapters
 const openai = new OpenAIAdapter();
 const claude = new AnthropicAdapter();
 const gemini = new GoogleAdapter();
+const groq = new GroqAdapter();
+const perplexity = new PerplexityAdapter();
 
 // Basic text generation
 const response = await openai.generate('Write a haiku about coding');
@@ -75,8 +78,10 @@ await gemini.generateStream('Count to 10', {
 | **Anthropic** | Claude 4, Claude 3.5 | Computer use, thinking, large context |
 | **Google** | Gemini 2.5, Gemini Pro | Multimodal, thinking mode, long context |
 | **Mistral** | Large, Medium, Codestral | Code generation, OCR, agents API |
+| **Groq** | Llama, Gemma, Mixtral | Ultra-fast inference, 750+ tokens/sec |
 | **OpenRouter** | 400+ models | Multi-provider access, cost optimization |
 | **Requesty** | 150+ models | Premium model access, high availability |
+| **Perplexity** | Sonar, Reasoning, Research | Real-time web search, citations, reasoning |
 
 ## 📝 Usage Examples
 
@@ -116,6 +121,21 @@ const code = await mistral.generate('Write a Python function', {
   model: 'codestral-25.01',
   maxTokens: 500
 });
+
+// Groq ultra-fast inference
+const groq = new GroqAdapter();
+const fastResponse = await groq.generate('Explain quantum computing', {
+  model: 'llama-3.1-70b-versatile',
+  maxTokens: 200
+});
+
+// Perplexity web search with citations
+const perplexity = new PerplexityAdapter();
+const searchResult = await perplexity.generate('What are the latest developments in AI?', {
+  model: 'sonar-pro',
+  maxTokens: 300
+});
+console.log(searchResult.citations); // Real-time web sources
 ```
 
 ### Multi-Provider Access

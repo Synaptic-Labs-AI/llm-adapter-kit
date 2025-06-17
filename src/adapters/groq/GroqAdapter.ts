@@ -11,7 +11,7 @@
  * - Compound model capabilities
  */
 
-import OpenAI from 'openai';
+import Groq from 'groq-sdk';
 import { BaseAdapter } from '../BaseAdapter';
 import { 
   GenerateOptions, 
@@ -41,15 +41,16 @@ export class GroqAdapter extends BaseAdapter {
   readonly name = 'groq';
   readonly baseUrl = 'https://api.groq.com/openai/v1';
   
-  private client: OpenAI;
+  private client: Groq;
 
   constructor(model?: string) {
     super('GROQ_API_KEY', model || GROQ_DEFAULT_MODEL);
     
-    // Initialize OpenAI client with Groq's OpenAI-compatible endpoint
-    this.client = new OpenAI({
+    // Initialize Groq client with official SDK
+    this.client = new Groq({
       apiKey: this.apiKey,
-      baseURL: this.baseUrl
+      timeout: 120000, // 2 minutes for complex requests
+      maxRetries: 3
     });
     
     this.initializeCache({
@@ -391,32 +392,38 @@ export class GroqAdapter extends BaseAdapter {
       throw error;
     }
 
-    // Handle Groq-specific error responses
-    if (error.response) {
-      const status = error.response.status;
-      const errorData = error.response.data?.error;
-      
+    // Handle Groq SDK error responses
+    if (error instanceof Groq.APIError) {
+      const status = error.status;
       let errorCode = 'HTTP_ERROR';
-      let message = errorData?.message || error.message;
+      let message = error.message;
 
       // Groq-specific error codes
-      if (status === 400 && errorData?.code === 'invalid_request_error') {
-        errorCode = 'INVALID_REQUEST';
-        if (message.includes('model')) {
-          errorCode = 'UNSUPPORTED_MODEL';
-        }
-      } else if (status === 401) {
-        errorCode = 'AUTHENTICATION_ERROR';
-        message = 'Invalid Groq API key. Please check your GROQ_API_KEY environment variable.';
-      } else if (status === 429) {
-        errorCode = 'RATE_LIMIT_ERROR';
-        message = 'Groq rate limit exceeded. Please try again later.';
-      } else if (status === 503) {
-        errorCode = 'SERVICE_UNAVAILABLE';
-        message = 'Groq service temporarily unavailable. Please try again.';
-      } else if (status >= 500) {
-        errorCode = 'SERVER_ERROR';
-        message = `Groq server error: ${message}`;
+      switch (status) {
+        case 400:
+          errorCode = 'INVALID_REQUEST';
+          if (message.includes('model')) {
+            errorCode = 'UNSUPPORTED_MODEL';
+          }
+          break;
+        case 401:
+          errorCode = 'AUTHENTICATION_ERROR';
+          message = 'Invalid Groq API key. Please check your GROQ_API_KEY environment variable.';
+          break;
+        case 429:
+          errorCode = 'RATE_LIMIT_ERROR';
+          message = 'Groq rate limit exceeded. Please try again later.';
+          break;
+        case 503:
+          errorCode = 'SERVICE_UNAVAILABLE';
+          message = 'Groq service temporarily unavailable. Please try again.';
+          break;
+        default:
+          if (status >= 500) {
+            errorCode = 'SERVER_ERROR';
+            message = `Groq server error: ${message}`;
+          }
+          break;
       }
 
       throw new LLMProviderError(

@@ -129,7 +129,8 @@ export function validateEnvironment(): {
     'ANTHROPIC_API_KEY',
     'MISTRAL_API_KEY',
     'OPENROUTER_API_KEY',
-    'REQUESTY_API_KEY'
+    'REQUESTY_API_KEY',
+    'PERPLEXITY_API_KEY'
   ];
 
   const configuredVars = requiredEnvVars.filter(varName => process.env[varName]);

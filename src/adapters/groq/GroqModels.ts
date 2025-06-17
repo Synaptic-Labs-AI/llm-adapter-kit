@@ -9,26 +9,12 @@
 import { ModelSpec } from '../modelTypes';
 
 export const GROQ_MODELS: ModelSpec[] = [
+  // Current Production Models (January 2025)
+  
   // Llama 3.1 models - Text generation
   {
     provider: 'groq',
-    name: 'Llama 3.1 405B',
-    apiName: 'llama-3.1-405b-reasoning',
-    contextWindow: 131072,
-    maxTokens: 8192,
-    inputCostPerMillion: 0.59,
-    outputCostPerMillion: 0.79,
-    capabilities: {
-      supportsJSON: true,
-      supportsImages: false,
-      supportsFunctions: true,
-      supportsStreaming: true,
-      supportsThinking: true
-    }
-  },
-  {
-    provider: 'groq',
-    name: 'Llama 3.1 70B',
+    name: 'Llama 3.1 70B Versatile',
     apiName: 'llama-3.1-70b-versatile',
     contextWindow: 131072,
     maxTokens: 8192,
@@ -44,7 +30,7 @@ export const GROQ_MODELS: ModelSpec[] = [
   },
   {
     provider: 'groq',
-    name: 'Llama 3.1 8B',
+    name: 'Llama 3.1 8B Instant',
     apiName: 'llama-3.1-8b-instant',
     contextWindow: 131072,
     maxTokens: 8192,
@@ -59,63 +45,15 @@ export const GROQ_MODELS: ModelSpec[] = [
     }
   },
 
-  // Llama 3.2 models - Vision and text
+  // Llama 3.3 models
   {
     provider: 'groq',
-    name: 'Llama 3.2 90B Vision',
-    apiName: 'llama-3.2-90b-vision-preview',
-    contextWindow: 131072,
-    maxTokens: 8192,
-    inputCostPerMillion: 0.90,
-    outputCostPerMillion: 0.90,
-    capabilities: {
-      supportsJSON: true,
-      supportsImages: true,
-      supportsFunctions: true,
-      supportsStreaming: true,
-      supportsThinking: false
-    }
-  },
-  {
-    provider: 'groq',
-    name: 'Llama 3.2 11B Vision',
-    apiName: 'llama-3.2-11b-vision-preview',
-    contextWindow: 131072,
-    maxTokens: 8192,
-    inputCostPerMillion: 0.18,
-    outputCostPerMillion: 0.18,
-    capabilities: {
-      supportsJSON: true,
-      supportsImages: true,
-      supportsFunctions: true,
-      supportsStreaming: true,
-      supportsThinking: false
-    }
-  },
-  {
-    provider: 'groq',
-    name: 'Llama 3.2 3B',
-    apiName: 'llama-3.2-3b-preview',
-    contextWindow: 131072,
-    maxTokens: 8192,
-    inputCostPerMillion: 0.06,
-    outputCostPerMillion: 0.06,
-    capabilities: {
-      supportsJSON: true,
-      supportsImages: false,
-      supportsFunctions: true,
-      supportsStreaming: true,
-      supportsThinking: false
-    }
-  },
-  {
-    provider: 'groq',
-    name: 'Llama 3.2 1B',
-    apiName: 'llama-3.2-1b-preview',
-    contextWindow: 131072,
-    maxTokens: 8192,
-    inputCostPerMillion: 0.04,
-    outputCostPerMillion: 0.04,
+    name: 'Llama 3.3 70B Versatile',
+    apiName: 'llama-3.3-70b-versatile',
+    contextWindow: 128000,
+    maxTokens: 32768,
+    inputCostPerMillion: 0.59,
+    outputCostPerMillion: 0.79,
     capabilities: {
       supportsJSON: true,
       supportsImages: false,
@@ -125,28 +63,10 @@ export const GROQ_MODELS: ModelSpec[] = [
     }
   },
 
-  // Mixtral models - Mixture of experts
+  // Gemma models
   {
     provider: 'groq',
-    name: 'Mixtral 8x7B',
-    apiName: 'mixtral-8x7b-32768',
-    contextWindow: 32768,
-    maxTokens: 8192,
-    inputCostPerMillion: 0.24,
-    outputCostPerMillion: 0.24,
-    capabilities: {
-      supportsJSON: true,
-      supportsImages: false,
-      supportsFunctions: true,
-      supportsStreaming: true,
-      supportsThinking: false
-    }
-  },
-
-  // Gemma models - Google's open model
-  {
-    provider: 'groq',
-    name: 'Gemma 2 9B',
+    name: 'Gemma 2 9B IT',
     apiName: 'gemma2-9b-it',
     contextWindow: 8192,
     maxTokens: 8192,
@@ -161,20 +81,88 @@ export const GROQ_MODELS: ModelSpec[] = [
     }
   },
 
-  // Whisper models - Audio transcription
+  // New Llama 4 models
   {
     provider: 'groq',
-    name: 'Whisper Large V3',
-    apiName: 'whisper-large-v3',
-    contextWindow: 448000, // ~25 minutes of audio
-    maxTokens: 4096,
-    inputCostPerMillion: 0.111, // Per minute of audio
-    outputCostPerMillion: 0.0, // No output cost for transcription
+    name: 'Llama 4 Scout',
+    apiName: 'llama-4-scout-17bx16e',
+    contextWindow: 128000,
+    maxTokens: 8192,
+    inputCostPerMillion: 0.11,
+    outputCostPerMillion: 0.34,
     capabilities: {
-      supportsJSON: false,
+      supportsJSON: true,
+      supportsImages: false,
+      supportsFunctions: true,
+      supportsStreaming: true,
+      supportsThinking: false
+    }
+  },
+  {
+    provider: 'groq',
+    name: 'Llama 4 Maverick',
+    apiName: 'llama-4-maverick-17bx128e',
+    contextWindow: 128000,
+    maxTokens: 8192,
+    inputCostPerMillion: 0.20,
+    outputCostPerMillion: 0.60,
+    capabilities: {
+      supportsJSON: true,
+      supportsImages: false,
+      supportsFunctions: true,
+      supportsStreaming: true,
+      supportsThinking: false
+    }
+  },
+
+  // Content moderation model
+  {
+    provider: 'groq',
+    name: 'Llama Guard 4 12B',
+    apiName: 'meta-llama/llama-guard-4-12b',
+    contextWindow: 131072,
+    maxTokens: 128,
+    inputCostPerMillion: 0.20,
+    outputCostPerMillion: 0.20,
+    capabilities: {
+      supportsJSON: true,
       supportsImages: false,
       supportsFunctions: false,
-      supportsStreaming: false,
+      supportsStreaming: true,
+      supportsThinking: false
+    }
+  },
+
+  // Preview models
+  {
+    provider: 'groq',
+    name: 'DeepSeek R1 Distill Llama 70B',
+    apiName: 'deepseek-r1-distill-llama-70b',
+    contextWindow: 128000,
+    maxTokens: 8192,
+    inputCostPerMillion: 0.75,
+    outputCostPerMillion: 0.99,
+    capabilities: {
+      supportsJSON: true,
+      supportsImages: false,
+      supportsFunctions: true,
+      supportsStreaming: true,
+      supportsThinking: true
+    }
+  },
+  {
+    provider: 'groq',
+    name: 'Qwen 3 32B',
+    apiName: 'qwen/qwen3-32b',
+    contextWindow: 128000,
+    maxTokens: 16384,
+    inputCostPerMillion: 0.29,
+    outputCostPerMillion: 0.59,
+    capabilities: {
+      supportsJSON: true,
+      supportsImages: false,
+      supportsFunctions: true,
+      supportsStreaming: true,
       supportsThinking: false
     }
   }
@@ -189,31 +177,36 @@ export const GROQ_MODEL_CATEGORIES = {
   // Ultra-fast text generation
   FAST_TEXT: [
     'llama-3.1-8b-instant',
-    'llama-3.2-3b-preview',
-    'llama-3.2-1b-preview'
+    'gemma2-9b-it'
   ],
   
   // High-quality text generation
   QUALITY_TEXT: [
-    'llama-3.1-405b-reasoning',
     'llama-3.1-70b-versatile',
-    'mixtral-8x7b-32768'
+    'llama-3.3-70b-versatile',
+    'llama-4-maverick-17bx128e'
   ],
   
-  // Vision-capable models
-  VISION: [
-    'llama-3.2-90b-vision-preview',
-    'llama-3.2-11b-vision-preview'
-  ],
-  
-  // Audio processing
-  AUDIO: [
-    'whisper-large-v3'
+  // New Llama 4 models
+  LLAMA_4: [
+    'llama-4-scout-17bx16e',
+    'llama-4-maverick-17bx128e'
   ],
   
   // Reasoning-optimized
   REASONING: [
-    'llama-3.1-405b-reasoning'
+    'deepseek-r1-distill-llama-70b'
+  ],
+  
+  // Content moderation
+  MODERATION: [
+    'meta-llama/llama-guard-4-12b'
+  ],
+  
+  // Preview/experimental models
+  PREVIEW: [
+    'deepseek-r1-distill-llama-70b',
+    'qwen/qwen3-32b'
   ]
 };
 

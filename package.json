@@ -44,6 +44,7 @@
     "@mistralai/mistralai": "^0.5.0",
     "axios": "^1.10.0",
     "dotenv": "^16.4.5",
+    "groq-sdk": "^0.25.0",
     "openai": "^4.52.7",
     "winston": "^3.13.0"
   },

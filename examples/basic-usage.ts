@@ -8,8 +8,10 @@ import {
   AnthropicAdapter, 
   GoogleAdapter,
   MistralAdapter,
+  GroqAdapter,
   OpenRouterAdapter,
-  RequestyAdapter
+  RequestyAdapter,
+  PerplexityAdapter
 } from '../src';
 
 async function basicExamples() {
@@ -20,8 +22,10 @@ async function basicExamples() {
   const claude = new AnthropicAdapter();
   const gemini = new GoogleAdapter();
   const mistral = new MistralAdapter();
+  const groq = new GroqAdapter();
   const router = new OpenRouterAdapter();
   const requesty = new RequestyAdapter();
+  const perplexity = new PerplexityAdapter();
 
   try {
     // 1. Basic text generation
