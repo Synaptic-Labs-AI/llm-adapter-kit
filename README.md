@@ -210,59 +210,6 @@ console.log({
 });
 ```
 
-## 📊 Model Information
-
-### OpenAI Models
-- `gpt-4o` - Latest flagship model
-- `gpt-4o-mini` - Fast and efficient
-- `o1-preview` - Advanced reasoning
-- `gpt-3.5-turbo` - Cost-effective
-
-### Anthropic Models
-- `claude-sonnet-4-20250514` - Latest Claude 4
-- `claude-3-5-haiku-latest` - Fast responses
-- `claude-3-5-sonnet-latest` - Balanced performance
-
-### Google Models
-- `gemini-2.5-flash` - Latest Gemini
-- `gemini-1.5-pro` - Advanced capabilities
-- `gemini-2.5-flash-thinking` - Reasoning mode
-
-### Mistral Models
-- `mistral-large-latest` - Flagship model
-- `mistral-medium-latest` - Balanced option
-- `codestral-25.01` - Code generation
-
-## 🛠️ Advanced Usage
-
-### Error Handling
-
-```typescript
-try {
-  const response = await adapter.generate('Hello', {
-    model: 'invalid-model'
-  });
-} catch (error) {
-  if (error instanceof LLMProviderError) {
-    console.log(`Provider error: ${error.message}`);
-    console.log(`Provider: ${error.provider}`);
-  }
-}
-```
-
-### Retry Logic
-
-All adapters include automatic retry logic with exponential backoff for handling rate limits and temporary failures.
-
-### Caching
-
-```typescript
-// Disable caching for specific requests
-const response = await adapter.generate('prompt', {
-  disableCache: true
-});
-```
-
 ## 📄 License
 
 MIT License - see LICENSE file for details.
@@ -277,17 +224,9 @@ MIT License - see LICENSE file for details.
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/synaptic-labs/llm-adapter-kit/issues)
+- **Issues**: [GitHub Issues](https://github.com/Synaptic-Labs-AI/llm-adapter-kit/issues)
 - **Documentation**: See example files in `/examples`
 - **API Reference**: Generated TypeScript definitions
-
-## 🗺️ Roadmap
-
-- [ ] Additional providers (Cohere, Together, etc.)
-- [ ] Embedding adapter support
-- [ ] Batch processing utilities
-- [ ] Response caching strategies
-- [ ] Model benchmarking tools
 
 ---
 
