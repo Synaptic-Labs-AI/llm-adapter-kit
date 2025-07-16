@@ -124,11 +124,15 @@ export interface ImageGenerationOptions {
   prompt: string;
   n?: number;
   size?: string;
-  quality?: 'low' | 'medium' | 'high' | 'auto';
+  quality?: 'low' | 'medium' | 'high' | 'auto' | 'standard' | 'hd';
   responseFormat?: 'url' | 'b64_json';
   style?: 'vivid' | 'natural';
-  aspectRatio?: 'square' | 'portrait' | 'landscape' | 'widescreen' | 'fullscreen';
+  aspectRatio?: 'square' | 'portrait' | 'landscape' | 'widescreen' | 'fullscreen' | '1:1' | '3:4' | '4:3' | '9:16' | '16:9';
   personGeneration?: 'allow' | 'block';
+  // gpt-image-1 specific options
+  background?: 'transparent' | 'opaque' | 'auto';
+  outputFormat?: 'png' | 'jpeg' | 'webp';
+  moderation?: 'low' | 'auto';
   timeout?: number;
   maxRetries?: number;
 }

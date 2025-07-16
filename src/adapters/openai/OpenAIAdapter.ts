@@ -129,14 +129,14 @@ export class OpenAIAdapter extends BaseAdapter {
   private async generateWithResponsesAPI(prompt: string, options?: GenerateOptions): Promise<LLMResponse> {
     const responseParams: any = {
       model: options?.model || this.currentModel,
-      messages: this.buildMessages(prompt, options?.systemPrompt),
+      input: this.buildInputForResponsesAPI(prompt, options?.systemPrompt),
       // Include usage information in response
-      include_usage: true
+      include: ['usage']
     };
 
     // Add response-specific parameters
     if (options?.temperature !== undefined) responseParams.temperature = options.temperature;
-    if (options?.maxTokens !== undefined) responseParams.max_completion_tokens = options.maxTokens;
+    if (options?.maxTokens !== undefined) responseParams.max_output_tokens = options.maxTokens;
     if (options?.stopSequences) responseParams.stop = options.stopSequences;
     if (options?.tools) responseParams.tools = options.tools;
     
@@ -149,38 +149,41 @@ export class OpenAIAdapter extends BaseAdapter {
     const response = await (this.client as any).responses.create(responseParams);
 
     const extractedUsage = this.extractUsage(response);
-    const choice = response.choices?.[0];
-    if (!choice) {
-      throw new Error('No response choice received from OpenAI Responses API');
+    
+    // Extract text from output items in Responses API
+    let responseText = '';
+    if (response.output && response.output.length > 0) {
+      for (const item of response.output) {
+        if (item.type === 'message' && item.content) {
+          for (const content of item.content) {
+            if (content.type === 'text') {
+              responseText += content.text;
+            }
+          }
+        }
+      }
     }
     
-    const finishReason = choice.finish_reason;
-    const mappedFinishReason: 'stop' | 'length' | 'tool_calls' | 'content_filter' = 
-      finishReason === 'stop' || finishReason === 'length' || finishReason === 'tool_calls' || finishReason === 'content_filter' 
-        ? finishReason 
-        : 'stop';
+    const finishReason = response.status === 'completed' ? 'stop' : 'length';
     
     return await this.buildLLMResponse(
-      choice.message?.content || '',
+      responseText,
       response.model,
       extractedUsage,
       undefined,
-      mappedFinishReason,
-      choice.message?.tool_calls
+      finishReason
     );
   }
 
   private async generateWithResponsesAPIStream(prompt: string, options?: StreamOptions): Promise<LLMResponse> {
     const streamParams: any = {
       model: options?.model || this.currentModel,
-      messages: this.buildMessages(prompt, options?.systemPrompt),
-      stream: true,
-      // Include usage information in streaming response
-      stream_options: { include_usage: true }
+      input: this.buildInputForResponsesAPI(prompt, options?.systemPrompt),
+      stream: true
     };
 
     if (options?.temperature !== undefined) streamParams.temperature = options.temperature;
-    if (options?.maxTokens !== undefined) streamParams.max_completion_tokens = options.maxTokens;
+    if (options?.maxTokens !== undefined) streamParams.max_output_tokens = options.maxTokens;
     if (options?.jsonMode) streamParams.response_format = { type: 'json_object' };
     if (options?.stopSequences) streamParams.stop = options.stopSequences;
     if (options?.tools) streamParams.tools = options.tools;
@@ -301,6 +304,26 @@ export class OpenAIAdapter extends BaseAdapter {
         'responses_api'
       ]
     };
+  }
+
+  private buildInputForResponsesAPI(prompt: string, systemPrompt?: string): any {
+    const contents = [];
+    
+    // Add system instruction if provided
+    if (systemPrompt) {
+      contents.push({
+        type: 'input_text',
+        text: systemPrompt
+      });
+    }
+    
+    // Add user prompt
+    contents.push({
+      type: 'input_text', 
+      text: prompt
+    });
+    
+    return contents;
   }
 
 }

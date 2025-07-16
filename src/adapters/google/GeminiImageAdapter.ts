@@ -40,17 +40,29 @@ export class GeminiImageAdapter extends BaseAdapter {
    */
   async generateImage(options: ImageGenerationOptions): Promise<ImageGenerationResponse> {
     try {
+      this.validateImageOptions(options);
+      
       const modelName = options.model || 'imagen-4.0-generate-preview-06-06';
       
       const response = await this.withRetry(async () => {
-        // Use the Google GenAI SDK for image generation with generateImages
+        // Use the correct API structure
+        const generateConfig: any = {
+          numberOfImages: options.n || 1,
+          aspectRatio: options.aspectRatio || '1:1'
+        };
+        
+        // Add personGeneration if specified
+        if (options.personGeneration) {
+          generateConfig.personGeneration = options.personGeneration;
+        }
+        
+        // Add includeRaiReason for better error handling
+        generateConfig.includeRaiReason = true;
+        
         return await this.client.models.generateImages({
           model: modelName,
           prompt: options.prompt,
-          config: {
-            numberOfImages: options.n || 1,
-            aspectRatio: options.aspectRatio || 'square'
-          }
+          config: generateConfig
         });
       }, options.maxRetries || 3);
 
@@ -76,12 +88,18 @@ export class GeminiImageAdapter extends BaseAdapter {
       throw new LLMProviderError('Google Imagen 4 supports 1-4 images per request', this.name, 'INVALID_IMAGE_COUNT');
     }
 
+    // Validate model is supported
+    const model = options.model || 'imagen-4.0-generate-preview-06-06';
+    if (!Object.values(this.imageModels).includes(model)) {
+      throw new LLMProviderError(`Invalid model. Supported models: ${Object.values(this.imageModels).join(', ')}`, this.name, 'INVALID_MODEL');
+    }
+
     // Imagen 4 Ultra only supports 1 image
-    if (options.model === 'imagen-4-ultra' && options.n && options.n > 1) {
+    if (model === 'imagen-4-ultra' && options.n && options.n > 1) {
       throw new LLMProviderError('Imagen 4 Ultra supports only 1 image per request', this.name, 'INVALID_IMAGE_COUNT');
     }
 
-    const validAspectRatios = ['square', 'portrait', 'landscape', 'widescreen', 'fullscreen'];
+    const validAspectRatios = ['1:1', '3:4', '4:3', '9:16', '16:9'];
     if (options.aspectRatio && !validAspectRatios.includes(options.aspectRatio)) {
       throw new LLMProviderError(`Invalid aspect ratio. Supported ratios: ${validAspectRatios.join(', ')}`, this.name, 'INVALID_ASPECT_RATIO');
     }
@@ -120,7 +138,7 @@ export class GeminiImageAdapter extends BaseAdapter {
    * Get supported aspect ratios
    */
   getSupportedAspectRatios(): string[] {
-    return ['square', 'portrait', 'landscape', 'widescreen', 'fullscreen'];
+    return ['1:1', '3:4', '4:3', '9:16', '16:9'];
   }
 
   /**

@@ -1,6 +1,6 @@
 /**
  * Google Model Specifications
- * Updated June 17, 2025 with latest Gemini releases
+ * Updated January 2025 with latest Imagen releases
  */
 
 import { ModelSpec } from '../modelTypes';
@@ -10,7 +10,7 @@ export const GOOGLE_MODELS: ModelSpec[] = [
   {
     provider: 'google',
     name: 'Gemini 2.5 Pro Experimental',
-    apiName: 'gemini-2.5-pro-preview-06-05',
+    apiName: 'gemini-2.5-pro',
     contextWindow: 2000000,
     maxTokens: 8192,
     inputCostPerMillion: 1.25,
@@ -26,7 +26,7 @@ export const GOOGLE_MODELS: ModelSpec[] = [
   {
     provider: 'google',
     name: 'Gemini 2.5 Flash',
-    apiName: 'gemini-2.5-flash-preview-05-20',
+    apiName: 'gemini-2.5-flash',
     contextWindow: 1048576,
     maxTokens: 65536,
     inputCostPerMillion: 0.15,
@@ -40,7 +40,7 @@ export const GOOGLE_MODELS: ModelSpec[] = [
     }
   },
 
-  // Image Generation Models
+  // Image Generation Models - Updated to latest Imagen
   {
     provider: 'google',
     name: 'Imagen 4',
@@ -79,4 +79,4 @@ export const GOOGLE_MODELS: ModelSpec[] = [
   }
 ];
 
-export const GOOGLE_DEFAULT_MODEL = 'gemini-2.5-flash-preview-05-20';
+export const GOOGLE_DEFAULT_MODEL = 'gemini-2.5-flash';

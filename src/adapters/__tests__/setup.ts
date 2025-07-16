@@ -9,19 +9,40 @@ import path from 'path';
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
-// Verify required environment variables
-const requiredEnvVars = [
-  'OPENAI_API_KEY',
-  'GOOGLE_API_KEY', 
-  'ANTHROPIC_API_KEY',
-  'MISTRAL_API_KEY'
-];
+// Verify required environment variables based on which tests are running
+const getRequiredEnvVars = () => {
+  const testFile = process.env.JEST_CURRENT_TEST_NAME || '';
+  const testPath = process.argv.find(arg => arg.includes('.test.ts')) || '';
+  
+  // For image adapter tests, only require OpenAI and Google keys
+  if (testPath.includes('ImageAdapters') || testFile.includes('Image')) {
+    return ['OPENAI_API_KEY', 'GOOGLE_API_KEY'];
+  }
+  
+  // For specific provider tests, only require that provider's key
+  if (testPath.includes('OpenAI') || testFile.includes('OpenAI')) {
+    return ['OPENAI_API_KEY'];
+  }
+  if (testPath.includes('Google') || testFile.includes('Google') || testFile.includes('Gemini')) {
+    return ['GOOGLE_API_KEY'];
+  }
+  if (testPath.includes('Anthropic') || testFile.includes('Anthropic')) {
+    return ['ANTHROPIC_API_KEY'];
+  }
+  if (testPath.includes('Mistral') || testFile.includes('Mistral')) {
+    return ['MISTRAL_API_KEY'];
+  }
+  
+  // Default: only warn about missing keys, don't fail
+  return [];
+};
 
+const requiredEnvVars = getRequiredEnvVars();
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
-  console.warn(`⚠️  Warning: Missing environment variables: ${missingVars.join(', ')}`);
-  console.warn('Some adapter tests will be skipped.');
+  console.warn(`⚠️  Warning: Missing environment variables for current tests: ${missingVars.join(', ')}`);
+  console.warn('Some specific tests will be skipped.');
 }
 
 // Global test configuration

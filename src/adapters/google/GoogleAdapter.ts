@@ -1,8 +1,8 @@
 /**
- * Google Gemini Adapter with 2.5 models and thinking capabilities
- * Supports latest Gemini features including thinking mode
+ * Google Gemini Adapter with 2.0+ models and latest capabilities
+ * Supports latest Gemini features using updated @google/genai SDK
  * Based on 2025 API documentation from Google AI Studio
- * Updated June 17, 2025 with latest model availability and pricing
+ * Updated January 2025 with latest model availability and API patterns
  */
 
 import { GoogleGenAI } from '@google/genai';
@@ -19,7 +19,7 @@ import { ModelRegistry } from '../ModelRegistry';
 
 export class GoogleAdapter extends BaseAdapter {
   readonly name = 'google';
-  readonly baseUrl = 'https://generativelanguage.googleapis.com/v1';
+  readonly baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
   
   private client: GoogleGenAI;
 
@@ -35,53 +35,58 @@ export class GoogleAdapter extends BaseAdapter {
   async generateUncached(prompt: string, options?: GenerateOptions): Promise<LLMResponse> {
     return this.withRetry(async () => {
       try {
-        const model = this.client.getGenerativeModel({ 
-          model: options?.model || this.currentModel 
-        });
-
-        const generationConfig: any = {
+        // Use the new ai.models.generateContent() pattern from the latest SDK
+        const config: any = {
           temperature: options?.temperature,
           maxOutputTokens: options?.maxTokens,
           topK: 40,
           topP: 0.95
         };
 
-        // Build request
-        const request: any = {
-          contents: [{
-            role: 'user',
-            parts: [{ text: prompt }]
-          }],
-          generationConfig
-        };
-
         // Add system instruction if provided
         if (options?.systemPrompt) {
-          request.systemInstruction = {
-            parts: [{ text: options.systemPrompt }]
-          };
-        }
-
-        // Enable thinking mode for 2.5 models
-        if (options?.enableThinking && this.supportsThinking(options?.model || this.currentModel)) {
-          request.thinking = true;
+          config.systemInstruction = options.systemPrompt;
         }
 
         // Add tools if provided
         if (options?.tools && options.tools.length > 0) {
-          request.tools = this.convertTools(options.tools);
+          config.tools = this.convertTools(options.tools);
         }
 
-        const response = await model.generateContent(request);
+        // Enable thinking mode for supported models
+        if (options?.enableThinking && this.supportsThinking(options?.model || this.currentModel)) {
+          config.thinkingConfig = {
+            includeThoughts: true
+          };
+        }
+
+        const response = await this.client.models.generateContent({
+          model: options?.model || this.currentModel,
+          contents: prompt,
+          config
+        });
+        
+        // Extract text from response
+        let responseText = '';
+        if (response.candidates && response.candidates.length > 0) {
+          const candidate = response.candidates[0];
+          if (candidate.content && candidate.content.parts) {
+            for (const part of candidate.content.parts) {
+              if (part.text) {
+                responseText += part.text;
+              }
+            }
+          }
+        }
         
         return {
-          text: response.response.text() || '',
+          text: responseText,
           model: options?.model || this.currentModel,
           provider: this.name,
           usage: this.extractGeminiUsage(response),
-          finishReason: this.mapFinishReason(response.response.candidates?.[0]?.finishReason),
+          finishReason: this.mapFinishReason(response.candidates?.[0]?.finishReason),
           metadata: {
-            thinking: options?.enableThinking ? response.response.candidates?.[0]?.content?.parts?.find(p => (p as any).thought !== undefined) : undefined
+            thinking: options?.enableThinking ? response.candidates?.[0]?.content?.parts?.find((p: any) => p.thought !== undefined) : undefined
           }
         };
       } catch (error) {
@@ -93,49 +98,62 @@ export class GoogleAdapter extends BaseAdapter {
   async generateStream(prompt: string, options?: StreamOptions): Promise<LLMResponse> {
     return this.withRetry(async () => {
       try {
-        const model = this.client.getGenerativeModel({ 
-          model: options?.model || this.currentModel 
-        });
-
-        const request: any = {
-          contents: [{
-            role: 'user',
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: options?.temperature,
-            maxOutputTokens: options?.maxTokens
-          }
+        // Use the new ai.models.generateContentStream() pattern
+        const config: any = {
+          temperature: options?.temperature,
+          maxOutputTokens: options?.maxTokens,
+          topK: 40,
+          topP: 0.95
         };
 
+        // Add system instruction if provided
         if (options?.systemPrompt) {
-          request.systemInstruction = {
-            parts: [{ text: options.systemPrompt }]
-          };
+          config.systemInstruction = options.systemPrompt;
         }
 
-        const streamingResponse = await model.generateContentStream(request);
+        // Add tools if provided
+        if (options?.tools && options.tools.length > 0) {
+          config.tools = this.convertTools(options.tools);
+        }
+
+        const streamingResponse = await this.client.models.generateContentStream({
+          model: options?.model || this.currentModel,
+          contents: prompt,
+          config
+        });
         
         let fullText = '';
         let usage: any = undefined;
 
-        for await (const chunk of streamingResponse.stream) {
-          const chunkText = chunk.text();
+        for await (const chunk of streamingResponse) {
+          // Extract text from streaming chunk
+          let chunkText = '';
+          if (chunk.candidates && chunk.candidates.length > 0) {
+            const candidate = chunk.candidates[0];
+            if (candidate.content && candidate.content.parts) {
+              for (const part of candidate.content.parts) {
+                if (part.text) {
+                  chunkText += part.text;
+                }
+              }
+            }
+          }
+          
           if (chunkText) {
             fullText += chunkText;
             options?.onToken?.(chunkText);
           }
         }
 
-        const finalResponse = await streamingResponse.response;
-        usage = this.extractGeminiUsage({ response: finalResponse });
+        // Extract usage from final response
+        usage = this.extractGeminiUsage(streamingResponse);
 
         const response: LLMResponse = {
           text: fullText,
           model: options?.model || this.currentModel,
           provider: this.name,
           usage,
-          finishReason: this.mapFinishReason(finalResponse.candidates?.[0]?.finishReason)
+          finishReason: 'stop'
         };
 
         options?.onComplete?.(response);
@@ -205,7 +223,8 @@ export class GoogleAdapter extends BaseAdapter {
   }
 
   private extractGeminiUsage(response: any): any {
-    const usage = response.response?.usageMetadata;
+    // Handle both old and new response formats
+    const usage = response.usageMetadata || response.response?.usageMetadata;
     if (usage) {
       return {
         promptTokens: usage.promptTokenCount || 0,

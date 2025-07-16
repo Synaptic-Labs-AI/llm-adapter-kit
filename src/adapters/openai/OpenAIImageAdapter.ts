@@ -36,37 +36,38 @@ export class OpenAIImageAdapter extends BaseAdapter {
   }
 
   /**
-   * Generate images using OpenAI's gpt-image-1 model via Responses API
+   * Generate images using OpenAI's image generation API
    */
   async generateImage(options: ImageGenerationOptions): Promise<ImageGenerationResponse> {
     try {
-      const requestParams = this.buildImageRequest(options);
+      this.validateImageOptions(options);
       
       const response = await this.withRetry(async () => {
-        // Use Responses API for gpt-image-1
-        return await this.client.beta.responses.create({
-          model: this.imageModel,
-          messages: [{ role: 'user', content: options.prompt }],
-          tools: [{
-            type: 'function',
-            function: {
-              name: 'generate_image',
-              description: 'Generate an image based on the prompt',
-              parameters: {
-                type: 'object',
-                properties: {
-                  size: { type: 'string', enum: ['1024x1024', '1024x1536', '1536x1024', '2048x2048', '4096x4096'] },
-                  quality: { type: 'string', enum: ['low', 'medium', 'high', 'auto'] },
-                  style: { type: 'string', enum: ['vivid', 'natural'] }
-                }
-              }
-            }
-          }],
-          response_format: {
-            type: 'tool_calls'
-          },
-          ...requestParams
-        });
+        // Use the Responses API for gpt-image-1
+        const params: any = {
+          prompt: options.prompt,
+          model: this.imageModel, // Always use gpt-image-1
+          n: 1, // Always 1 for gpt-image-1
+          size: options.size || 'auto',
+          quality: options.quality || 'auto'
+        };
+
+        // Add background control if provided
+        if (options.background) {
+          params.background = options.background;
+        }
+
+        // Add output format if provided
+        if (options.outputFormat) {
+          params.output_format = options.outputFormat;
+        }
+
+        // Add moderation level if provided
+        if (options.moderation) {
+          params.moderation = options.moderation;
+        }
+
+        return await this.client.images.generate(params);
       }, options.maxRetries || 3);
 
       return this.buildImageResponse(response, options);
@@ -83,22 +84,36 @@ export class OpenAIImageAdapter extends BaseAdapter {
       throw new LLMProviderError('Prompt is required', this.name, 'MISSING_PROMPT');
     }
 
-    if (options.prompt.length > 4000) {
-      throw new LLMProviderError('Prompt too long (max 4000 characters)', this.name, 'PROMPT_TOO_LONG');
+    if (options.prompt.length > 32000) {
+      throw new LLMProviderError('Prompt too long (max 32,000 characters for gpt-image-1)', this.name, 'PROMPT_TOO_LONG');
     }
 
-    if (options.n && (options.n < 1 || options.n > 1)) {
-      throw new LLMProviderError('OpenAI currently supports only 1 image per request', this.name, 'INVALID_IMAGE_COUNT');
+    const model = options.model || this.imageModel;
+
+    // Only support gpt-image-1 model
+    if (model !== 'gpt-image-1') {
+      throw new LLMProviderError('Only gpt-image-1 model is supported', this.name, 'INVALID_MODEL');
     }
 
-    const validSizes = ['1024x1024', '1024x1536', '1536x1024', '2048x2048', '4096x4096'];
-    if (options.size && !validSizes.includes(options.size)) {
-      throw new LLMProviderError(`Invalid size. Supported sizes: ${validSizes.join(', ')}`, this.name, 'INVALID_SIZE');
+    // Image count validation - gpt-image-1 supports only 1 image
+    if (options.n && options.n !== 1) {
+      throw new LLMProviderError('gpt-image-1 supports only 1 image per request', this.name, 'INVALID_IMAGE_COUNT');
     }
 
-    const validQualities = ['low', 'medium', 'high', 'auto'];
-    if (options.quality && !validQualities.includes(options.quality)) {
-      throw new LLMProviderError(`Invalid quality. Supported qualities: ${validQualities.join(', ')}`, this.name, 'INVALID_QUALITY');
+    // Size validation for gpt-image-1
+    if (options.size) {
+      const validSizes = ['1024x1024', '1536x1024', '1024x1536', 'auto'];
+      if (!validSizes.includes(options.size)) {
+        throw new LLMProviderError(`Invalid size for gpt-image-1. Supported sizes: ${validSizes.join(', ')}`, this.name, 'INVALID_SIZE');
+      }
+    }
+
+    // Quality validation for gpt-image-1
+    if (options.quality) {
+      const validQualities = ['low', 'medium', 'high', 'auto'];
+      if (!validQualities.includes(options.quality)) {
+        throw new LLMProviderError(`Invalid quality for gpt-image-1. Supported qualities: ${validQualities.join(', ')}`, this.name, 'INVALID_QUALITY');
+      }
     }
   }
 
@@ -125,25 +140,18 @@ export class OpenAIImageAdapter extends BaseAdapter {
   }
 
   /**
-   * Get supported image sizes
+   * Get supported image sizes for gpt-image-1
    */
   getSupportedSizes(): string[] {
-    return ['1024x1024', '1024x1536', '1536x1024', '2048x2048', '4096x4096'];
+    return ['1024x1024', '1536x1024', '1024x1536', 'auto'];
   }
 
   /**
-   * Get pricing for image generation
+   * Get pricing for gpt-image-1 image generation
    */
-  async getImagePricing(size: string = '1024x1024'): Promise<CostDetails> {
-    const basePricing = {
-      '1024x1024': 0.015,
-      '1024x1536': 0.015,
-      '1536x1024': 0.015,
-      '2048x2048': 0.025,
-      '4096x4096': 0.05
-    };
-
-    const basePrice = basePricing[size as keyof typeof basePricing] || 0.015;
+  async getImagePricing(size: string = 'auto'): Promise<CostDetails> {
+    // gpt-image-1 has fixed pricing regardless of size
+    const basePrice = 0.015;
 
     return {
       inputCost: 0,
@@ -180,44 +188,57 @@ export class OpenAIImageAdapter extends BaseAdapter {
   }
 
   private buildImageResponse(response: any, options: ImageGenerationOptions): ImageGenerationResponse {
-    // Extract images from Responses API tool calls
     const images: Array<{url?: string; b64_json?: string; revised_prompt?: string}> = [];
     
-    if (response.choices?.[0]?.message?.tool_calls) {
-      for (const toolCall of response.choices[0].message.tool_calls) {
-        if (toolCall.function.name === 'generate_image') {
-          // Parse the tool call result to extract image data
-          const imageData = JSON.parse(toolCall.function.arguments);
-          images.push({
-            url: imageData.url,
-            b64_json: imageData.b64_json,
-            revised_prompt: imageData.revised_prompt
-          });
+    // Extract images from the standard OpenAI response
+    if (response.data) {
+      for (const imageData of response.data) {
+        const image: any = {};
+        if (imageData.url) {
+          image.url = imageData.url;
         }
+        if (imageData.b64_json) {
+          image.b64_json = imageData.b64_json;
+        }
+        if (imageData.revised_prompt) {
+          image.revised_prompt = imageData.revised_prompt;
+        }
+        images.push(image);
       }
     }
 
-    const usage = {
-      promptTokens: response.usage?.prompt_tokens || Math.ceil(options.prompt.length / 4),
-      totalTokens: response.usage?.total_tokens || Math.ceil(options.prompt.length / 4)
+    // Calculate usage based on whether it's gpt-image-1 or other models
+    const usage = response.usage ? {
+      promptTokens: response.usage.input_tokens || response.usage.prompt_tokens || 0,
+      completionTokens: response.usage.output_tokens || 0,
+      totalTokens: response.usage.total_tokens || 0
+    } : {
+      promptTokens: Math.ceil(options.prompt.length / 4),
+      completionTokens: 0,
+      totalTokens: Math.ceil(options.prompt.length / 4)
     };
 
+    // Calculate cost for gpt-image-1 (fixed price)
+    const pricePerImage = 0.015;
+
     const cost = {
-      totalCost: 0.015, // Base cost per image
+      totalCost: pricePerImage * (options.n || 1),
       currency: 'USD',
-      pricePerImage: 0.015
+      pricePerImage
     };
 
     return {
       images,
-      model: this.imageModel,
+      model: options.model || this.imageModel,
       provider: this.name,
       usage,
       cost,
       metadata: {
-        size: options.size || '1024x1024',
-        quality: options.quality || 'high',
-        responseFormat: options.responseFormat || 'url'
+        size: options.size || response.size || 'auto',
+        quality: options.quality || response.quality || 'auto',
+        responseFormat: 'b64_json', // gpt-image-1 always returns base64
+        background: response.background,
+        output_format: response.output_format
       }
     };
   }
