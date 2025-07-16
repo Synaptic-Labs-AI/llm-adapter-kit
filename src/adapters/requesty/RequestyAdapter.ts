@@ -185,6 +185,7 @@ export class RequestyAdapter extends BaseAdapter {
       supportsImages: true,
       supportsFunctions: true,
       supportsThinking: false,
+      supportsImageGeneration: false, // Requesty doesn't support image generation directly
       maxContextWindow: 128000, // Varies by model
       supportedFeatures: [
         'chat_completions',

@@ -274,6 +274,7 @@ export class GroqAdapter extends BaseAdapter {
       supportsImages: true, // Via vision models
       supportsFunctions: true,
       supportsThinking: true, // Via reasoning models
+      supportsImageGeneration: false, // Groq doesn't support image generation
       maxContextWindow: 131072, // Llama 3.1/3.2 context window
       supportedFeatures: [
         'chat',

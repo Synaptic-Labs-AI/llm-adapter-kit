@@ -202,6 +202,7 @@ export class MistralAdapter extends BaseAdapter {
       supportsImages: true,
       supportsFunctions: true,
       supportsThinking: false,
+      supportsImageGeneration: false, // Mistral doesn't support image generation
       maxContextWindow: 128000,
       supportedFeatures: [
         'chat_completions',

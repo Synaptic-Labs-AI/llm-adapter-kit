@@ -17,6 +17,10 @@ export { GroqAdapter } from './groq/GroqAdapter';
 export { PerplexityAdapter } from './perplexity/PerplexityAdapter';
 // export { OllamaAdapter } from './OllamaAdapter';  // Not implemented yet
 
+// Image generation adapters
+export { OpenAIImageAdapter } from './openai/OpenAIImageAdapter';
+export { GeminiImageAdapter } from './google/GeminiImageAdapter';
+
 // Model registry and cost calculation
 export * from './modelTypes';
 export * from './ModelRegistry';
@@ -32,7 +36,9 @@ import { RequestyAdapter } from './requesty/RequestyAdapter';
 import { GroqAdapter } from './groq/GroqAdapter';
 import { PerplexityAdapter } from './perplexity/PerplexityAdapter';
 // import { OllamaAdapter } from './OllamaAdapter';  // Not implemented yet
-import { SupportedProvider, LLMProviderError } from './types';
+import { OpenAIImageAdapter } from './openai/OpenAIImageAdapter';
+import { GeminiImageAdapter } from './google/GeminiImageAdapter';
+import { SupportedProvider, LLMProviderError, ProviderConfig } from './types';
 
 /**
  * Factory function to create adapter instances
@@ -66,6 +72,32 @@ export function createAdapter(provider: SupportedProvider, model?: string): Base
         'UNSUPPORTED_PROVIDER'
       );
   }
+}
+
+/**
+ * Factory function to create image generation adapters
+ */
+export function createImageAdapter(provider: 'openai' | 'google' | 'gemini', config?: ProviderConfig): OpenAIImageAdapter | GeminiImageAdapter {
+  switch (provider.toLowerCase()) {
+    case 'openai':
+      return new OpenAIImageAdapter(config);
+    case 'google':
+    case 'gemini':
+      return new GeminiImageAdapter(config);
+    default:
+      throw new LLMProviderError(
+        `Unsupported image generation provider: ${provider}`,
+        'factory',
+        'UNSUPPORTED_IMAGE_PROVIDER'
+      );
+  }
+}
+
+/**
+ * Get all available image generation providers
+ */
+export function getAvailableImageProviders(): ('openai' | 'google')[] {
+  return ['openai', 'google'];
 }
 
 /**
@@ -229,6 +261,7 @@ export async function compareProviders(): Promise<ProviderComparison[]> {
           supportsImages: false,
           supportsFunctions: false,
           supportsThinking: false,
+          supportsImageGeneration: false,
           maxContextWindow: 0,
           supportedFeatures: []
         },

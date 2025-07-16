@@ -185,6 +185,7 @@ export class OpenRouterAdapter extends BaseAdapter {
       supportsImages: true,
       supportsFunctions: true,
       supportsThinking: false,
+      supportsImageGeneration: false, // OpenRouter doesn't support image generation directly
       maxContextWindow: 2000000, // Varies by model
       supportedFeatures: [
         'chat_completions',

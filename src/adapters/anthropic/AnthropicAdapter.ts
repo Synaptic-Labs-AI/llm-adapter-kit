@@ -230,6 +230,7 @@ export class AnthropicAdapter extends BaseAdapter {
       supportsImages: true,
       supportsFunctions: true,
       supportsThinking: true,
+      supportsImageGeneration: false, // Anthropic doesn't support image generation
       maxContextWindow: 200000,
       supportedFeatures: [
         'messages',

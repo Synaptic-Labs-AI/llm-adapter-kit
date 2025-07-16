@@ -123,6 +123,7 @@ export class PerplexityAdapter extends BaseAdapter {
       supportsImages: false,
       supportsFunctions: false,
       supportsThinking: true, // For reasoning models
+      supportsImageGeneration: false, // Perplexity doesn't support image generation
       maxContextWindow: 200000, // Max for Sonar Pro models
       supportedFeatures: [
         'chat',

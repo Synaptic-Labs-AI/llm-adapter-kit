@@ -18,6 +18,8 @@ export interface ModelSpec {
   inputCostPerMillion: number;
   /** Output cost per million tokens in USD */
   outputCostPerMillion: number;
+  /** Image generation cost per image in USD (optional) */
+  imageGenerationCost?: number;
   /** Model capabilities */
   capabilities: {
     supportsJSON: boolean;
@@ -25,5 +27,6 @@ export interface ModelSpec {
     supportsFunctions: boolean;
     supportsStreaming: boolean;
     supportsThinking: boolean;
+    supportsImageGeneration?: boolean;
   };
 }

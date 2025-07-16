@@ -71,9 +71,11 @@ export interface ModelInfo {
   supportsFunctions: boolean;
   supportsStreaming: boolean;
   supportsThinking?: boolean;
+  supportsImageGeneration?: boolean;
   pricing: {
     inputPerMillion: number;
     outputPerMillion: number;
+    imageGeneration?: number;
     currency: string;
     lastUpdated: string; // ISO date string
   };
@@ -111,8 +113,51 @@ export interface ProviderCapabilities {
   supportsImages: boolean;
   supportsFunctions: boolean;
   supportsThinking: boolean;
+  supportsImageGeneration: boolean;
   maxContextWindow: number;
   supportedFeatures: string[];
+}
+
+// Image Generation Types
+export interface ImageGenerationOptions {
+  model?: string;
+  prompt: string;
+  n?: number;
+  size?: string;
+  quality?: 'low' | 'medium' | 'high' | 'auto';
+  responseFormat?: 'url' | 'b64_json';
+  style?: 'vivid' | 'natural';
+  aspectRatio?: 'square' | 'portrait' | 'landscape' | 'widescreen' | 'fullscreen';
+  personGeneration?: 'allow' | 'block';
+  timeout?: number;
+  maxRetries?: number;
+}
+
+export interface ImageGenerationResponse {
+  images: Array<{
+    url?: string;
+    b64_json?: string;
+    revised_prompt?: string;
+  }>;
+  model: string;
+  provider: string;
+  usage?: {
+    promptTokens: number;
+    totalTokens: number;
+  };
+  cost?: {
+    totalCost: number;
+    currency: string;
+    pricePerImage: number;
+  };
+  metadata?: Record<string, any>;
+}
+
+export interface ImageGenerationError {
+  code: string;
+  message: string;
+  type: 'rate_limit' | 'invalid_request' | 'authentication' | 'server_error' | 'content_filter';
+  provider: string;
 }
 
 export class LLMProviderError extends Error {
@@ -143,10 +188,13 @@ export type SupportedModel =
   | 'gpt-4-turbo-preview'
   | 'gpt-4o'
   | 'gpt-3.5-turbo'
+  | 'gpt-image-1'
   // Google
   | 'gemini-2.5-pro-experimental'
   | 'gemini-2.5-flash'
   | 'gemini-2.0-flash-001'
+  | 'imagen-4.0-generate-preview-06-06'
+  | 'imagen-4-ultra'
   // Anthropic
   | 'claude-4-opus-20250124'
   | 'claude-4-sonnet-20250124'

@@ -158,6 +158,26 @@ export const OPENAI_MODELS: ModelSpec[] = [
       supportsStreaming: true,
       supportsThinking: true
     }
+  },
+
+  // Image Generation Models
+  {
+    provider: 'openai',
+    name: 'GPT Image 1',
+    apiName: 'gpt-image-1',
+    contextWindow: 4000,
+    maxTokens: 0,
+    inputCostPerMillion: 0,
+    outputCostPerMillion: 0,
+    imageGenerationCost: 0.015,
+    capabilities: {
+      supportsJSON: false,
+      supportsImages: false,
+      supportsFunctions: false,
+      supportsStreaming: true, // Supports streaming via Responses API
+      supportsThinking: false,
+      supportsImageGeneration: true
+    }
   }
 ];
 

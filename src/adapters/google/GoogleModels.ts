@@ -38,6 +38,44 @@ export const GOOGLE_MODELS: ModelSpec[] = [
       supportsStreaming: true,
       supportsThinking: false
     }
+  },
+
+  // Image Generation Models
+  {
+    provider: 'google',
+    name: 'Imagen 4',
+    apiName: 'imagen-4.0-generate-preview-06-06',
+    contextWindow: 480,
+    maxTokens: 0,
+    inputCostPerMillion: 0,
+    outputCostPerMillion: 0,
+    imageGenerationCost: 0.04,
+    capabilities: {
+      supportsJSON: false,
+      supportsImages: false,
+      supportsFunctions: false,
+      supportsStreaming: false,
+      supportsThinking: false,
+      supportsImageGeneration: true
+    }
+  },
+  {
+    provider: 'google',
+    name: 'Imagen 4 Ultra',
+    apiName: 'imagen-4-ultra',
+    contextWindow: 480,
+    maxTokens: 0,
+    inputCostPerMillion: 0,
+    outputCostPerMillion: 0,
+    imageGenerationCost: 0.06,
+    capabilities: {
+      supportsJSON: false,
+      supportsImages: false,
+      supportsFunctions: false,
+      supportsStreaming: false,
+      supportsThinking: false,
+      supportsImageGeneration: true
+    }
   }
 ];
 

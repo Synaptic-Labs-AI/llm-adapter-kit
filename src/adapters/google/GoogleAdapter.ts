@@ -5,7 +5,7 @@
  * Updated June 17, 2025 with latest model availability and pricing
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { BaseAdapter } from '../BaseAdapter';
 import { 
   GenerateOptions, 
@@ -21,12 +21,14 @@ export class GoogleAdapter extends BaseAdapter {
   readonly name = 'google';
   readonly baseUrl = 'https://generativelanguage.googleapis.com/v1';
   
-  private client: GoogleGenerativeAI;
+  private client: GoogleGenAI;
 
   constructor(model?: string) {
     super('GOOGLE_API_KEY', model || 'gemini-2.5-flash');
     
-    this.client = new GoogleGenerativeAI(this.apiKey);
+    this.client = new GoogleGenAI({
+      apiKey: this.apiKey
+    });
     this.initializeCache();
   }
 
@@ -163,6 +165,7 @@ export class GoogleAdapter extends BaseAdapter {
       supportsImages: true,
       supportsFunctions: true,
       supportsThinking: true,
+      supportsImageGeneration: true, // Google supports image generation via Imagen
       maxContextWindow: 2000000, // Gemini 1.5 Pro
       supportedFeatures: [
         'text_generation',

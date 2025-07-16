@@ -289,6 +289,7 @@ export class OpenAIAdapter extends BaseAdapter {
       supportsImages: true,
       supportsFunctions: true,
       supportsThinking: true, // For reasoning models
+      supportsImageGeneration: true, // OpenAI supports image generation
       maxContextWindow: 200000, // Conservative estimate for GPT-4
       supportedFeatures: [
         'chat',

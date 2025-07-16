@@ -39,13 +39,13 @@
   "author": "Synaptic Labs",
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.24.3",
-    "@google/generative-ai": "^0.21.0",
-    "@mistralai/mistralai": "^0.5.0",
+    "@anthropic-ai/sdk": "^0.56.0",
+    "@google/genai": "^1.9.0",
+    "@mistralai/mistralai": "^1.7.4",
     "axios": "^1.10.0",
     "dotenv": "^16.4.5",
-    "groq-sdk": "^0.25.0",
-    "openai": "^4.52.7",
+    "groq-sdk": "^0.27.0",
+    "openai": "^5.9.2",
     "winston": "^3.13.0"
   },
   "devDependencies": {
