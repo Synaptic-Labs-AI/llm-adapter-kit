@@ -14,6 +14,7 @@ export { MistralAdapter } from './mistral/MistralAdapter';
 export { OpenRouterAdapter } from './openrouter/OpenRouterAdapter';
 export { RequestyAdapter } from './requesty/RequestyAdapter';
 export { GroqAdapter } from './groq/GroqAdapter';
+export { GrokAdapter } from './grok/GrokAdapter';
 export { PerplexityAdapter } from './perplexity/PerplexityAdapter';
 // export { OllamaAdapter } from './OllamaAdapter';  // Not implemented yet
 
@@ -34,6 +35,7 @@ import { MistralAdapter } from './mistral/MistralAdapter';
 import { OpenRouterAdapter } from './openrouter/OpenRouterAdapter';
 import { RequestyAdapter } from './requesty/RequestyAdapter';
 import { GroqAdapter } from './groq/GroqAdapter';
+import { GrokAdapter } from './grok/GrokAdapter';
 import { PerplexityAdapter } from './perplexity/PerplexityAdapter';
 // import { OllamaAdapter } from './OllamaAdapter';  // Not implemented yet
 import { OpenAIImageAdapter } from './openai/OpenAIImageAdapter';
@@ -61,6 +63,8 @@ export function createAdapter(provider: SupportedProvider, model?: string): Base
       return new RequestyAdapter(model);
     case 'groq':
       return new GroqAdapter(model);
+    case 'grok':
+      return new GrokAdapter(model);
     case 'perplexity':
       return new PerplexityAdapter(model);
     // case 'ollama':
@@ -104,7 +108,7 @@ export function getAvailableImageProviders(): ('openai' | 'google')[] {
  * Get all available providers
  */
 export function getAvailableProviders(): SupportedProvider[] {
-  return ['openai', 'google', 'anthropic', 'mistral', 'openrouter', 'requesty', 'groq', 'perplexity'];
+  return ['openai', 'google', 'anthropic', 'mistral', 'openrouter', 'requesty', 'groq', 'grok', 'perplexity'];
 }
 
 /**
@@ -170,6 +174,7 @@ export async function selectBestProvider(criteria?: {
     // Performance preferences (subjective weights based on 2025 performance)
     const performanceScores: Record<string, number> = {
       'groq': 6,      // Ultra-fast inference
+      'grok': 6,      // Cutting-edge reasoning with Grok 4
       'google': 5,    // Gemini 2.5 Flash - best performance/cost
       'anthropic': 4, // Claude 4 - best reasoning
       'openai': 3,    // GPT-4 Turbo - reliable
@@ -188,6 +193,7 @@ export async function selectBestProvider(criteria?: {
         'mistral': 2,   // Good pricing
         'requesty': 2,  // Cost optimization
         'openrouter': 1,
+        'grok': 0,      // Premium pricing ($3/$15 per million)
         'anthropic': 0, // More expensive
         'openai': 0     // More expensive
       };
@@ -198,6 +204,7 @@ export async function selectBestProvider(criteria?: {
       // Adjust for speed
       const speedScores: Record<string, number> = {
         'groq': 5,      // Ultra-fast inference (up to 750 tokens/sec)
+        'grok': 4,      // Fast reasoning models
         'google': 3,    // Gemini Flash
         'openai': 2,    // GPT-4 Turbo
         'openrouter': 2,

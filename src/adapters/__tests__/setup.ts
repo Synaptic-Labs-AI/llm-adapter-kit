@@ -32,6 +32,9 @@ const getRequiredEnvVars = () => {
   if (testPath.includes('Mistral') || testFile.includes('Mistral')) {
     return ['MISTRAL_API_KEY'];
   }
+  if (testPath.includes('Grok') || testFile.includes('Grok')) {
+    return ['XAI_API_KEY'];
+  }
   
   // Default: only warn about missing keys, don't fail
   return [];

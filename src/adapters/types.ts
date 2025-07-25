@@ -184,6 +184,7 @@ export type SupportedProvider =
   | 'openrouter'
   | 'requesty'
   | 'groq'
+  | 'grok'
   | 'perplexity'
   | 'ollama';
 
